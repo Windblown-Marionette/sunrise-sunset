@@ -3,8 +3,10 @@
 # estimates apparent sunrise and sunset times
 # includes effects of atmospheric refraction
 # does not include effects of mountain ranges, etc.
-# based on https://github.com/kelvins/sunrisesunset
+
 # based on Richard Droste (2022). sunRiseSet( lat, lng, UTCoff, date, PLOT) (https://www.mathworks.com/matlabcentral/fileexchange/62180-sunriseset-lat-lng-utcoff-date-plot), MATLAB Central File Exchange. Retrieved October 28, 2022. 
+# which was based on these spreadsheets by the NOAA https://gml.noaa.gov/grad/solcalc/calcdetails.html
+# which were based on equations from Astronomical Algorithms, by Jean Meeus
 # adaptations in other languages can be found at https://math.stackexchange.com/questions/2186683/how-to-calculate-sunrise-and-sunset-times/2598266#2598266
 
 
@@ -38,6 +40,11 @@ def get_sunrise_sunset(latitude, longitude, utc_offset, date):
     #! the ancestor of this code was made in Excel
     #! the epoch in my system is January 1, 1970
     #! I wonder whether this will cause trouble
+
+    # seconds in a day
+    seconds_per_day = 60 * 60 * 24
+
+    # 
 
 
 
