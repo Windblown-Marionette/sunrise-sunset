@@ -22,8 +22,26 @@ def degrees_to_radians(deg):
     return deg * (math.pi / 180)
 
 
+def scale_seconds(seconds):
+    # scales seconds to fit within 0 - 1
+    seconds_per_day = 60 * 60 * 24
+    return seconds / seconds_per_day
 
-    
+
+def julian_day(days_since_epoch, seconds_scaled, utc_offset):
+    return days_since_epoch + 2415018.5 + seconds_scaled - (utc_offset / 24)
+
+
+def julian_century(jul_day):
+    return (jul_day - 2451545) / 36525
+
+
+def geometric_mean_long_sun(jul_cent):
+    # the geometric mean of the longitude of the sun
+    # math.fmod is recommended by the python documentation for floats
+    return math.fmod((280.46646 + jul_cent * (36000.76983 + jul_cent * 0.0003032)), 360.0)
+
+
 def estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since_midnight, return_seconds = False):
     ''' estimates the apparent sunrise and sunset times
         inputs latitude, longitude, utc_offset, date
@@ -31,13 +49,13 @@ def estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since
 
         ex. ->
     '''
-    # validation of latitude and longitude
+    ###### validation of latitude and longitude
 
-    # validation of utc_offset
+    ###### validation of utc_offset
 
-    # validation of date
+    ###### validation of date
 
-    # days since 12/30/1899
+    ###### days since 12/30/1899
     #! note this is the epoch for microsoft office
     #! the ancestor of this code was made in Excel
     #! the epoch in my system is January 1, 1970
