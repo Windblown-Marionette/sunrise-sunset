@@ -36,11 +36,26 @@ def julian_century(jul_day):
     return (jul_day - 2451545) / 36525
 
 
-def geometric_mean_long_sun(jul_cent):
+def geom_mean_long_sun(jul_cent):
     # the geometric mean of the longitude of the sun
+    # in degrees
     # math.fmod is recommended by the python documentation for floats
     return math.fmod((280.46646 + jul_cent * (36000.76983 + jul_cent * 0.0003032)), 360.0)
 
+def geom_mean_anom_sun(jul_cent):
+    # the geometric mean anomaly of the sun
+    # in degrees
+    return 357.52911 + jul_cent * (35999.05029 - 0.0001537 * jul_cent)
+
+
+def eccent_earth_orbit(jul_cent):
+    # the eccentricity of earth's orbit
+    return 0.016708634 - jul_cent * (0.000042037 + 0.0000001267 * jul_cent)
+
+
+def sun_eq_of_ctr(geom_mean_anom_sun, jul_cent):
+    # the sun's equation of the center
+    return math.sin(degrees_to_radians(geom_mean_anom_sun)) * (1.914602 - jul_cent * (0.004817 + 0.000014 * jul_cent))+math.sin(degrees_to_radians(2 * geom_mean_anom_sun)) * (0.019993 - 0.000101 * jul_cent)+math.sin(degrees_to_radians(3 * geom_mean_anom_sun)) * 0.000289
 
 def estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since_midnight, return_seconds = False):
     ''' estimates the apparent sunrise and sunset times
