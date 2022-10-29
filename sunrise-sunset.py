@@ -12,6 +12,7 @@
 
 import time
 import math
+from urllib.parse import _NetlocResultMixinStr
 
 
 def radians_to_degrees(rad):
@@ -56,6 +57,32 @@ def eccent_earth_orbit(jul_cent):
 def sun_eq_of_ctr(geom_mean_anom_sun, jul_cent):
     # the sun's equation of the center
     return math.sin(degrees_to_radians(geom_mean_anom_sun)) * (1.914602 - jul_cent * (0.004817 + 0.000014 * jul_cent))+math.sin(degrees_to_radians(2 * geom_mean_anom_sun)) * (0.019993 - 0.000101 * jul_cent)+math.sin(degrees_to_radians(3 * geom_mean_anom_sun)) * 0.000289
+
+
+def sun_true_long(geom_mean_long_sun, sun_eq_of_ctr):
+    # the true longitude of the sun
+    # in degrees
+    return geom_mean_long_sun + sun_eq_of_ctr
+
+
+def sun_true_anom(geom_mean_anom_sun, sun_eq_of_ctr):
+    # the true anomaly of the sun
+    # in degrees
+    return geom_mean_anom_sun + sun_eq_of_ctr
+
+def sun_rad_vector():
+    # the sun radius vector
+    # in AUs
+    # I'm not sure if this is used for anything
+    print('oh hey the sun radius vector does something')
+    return None
+
+
+def sun_app_long(sun_true_long, julian_century):
+    # the sun's apparent longitude
+    # in degrees
+    return sun_true_long - 0.00569 - 0.00478 * math.sin(degrees_to_radians(125.04 - 1934.136 * julian_century))
+    
 
 def estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since_midnight, return_seconds = False):
     ''' estimates the apparent sunrise and sunset times
