@@ -22,7 +22,7 @@ def degrees_to_radians(deg):
     return deg * (180 / math.pi)
 
     
-def get_sunrise_sunset(latitude, longitude, utc_offset, date):
+def estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since_midnight, return_seconds = False):
     ''' estimates the apparent sunrise and sunset times
         inputs latitude, longitude, utc_offset, date
         outputs sunrise_time, sunset_time, error
@@ -40,16 +40,45 @@ def get_sunrise_sunset(latitude, longitude, utc_offset, date):
     #! the ancestor of this code was made in Excel
     #! the epoch in my system is January 1, 1970
     #! I wonder whether this will cause trouble
+    
+    sunrise = 5
+    sunset = 5
+    if return_seconds:
+        print(sunrise, sunset)
+        return {'sunrise' : sunrise, 'sunset' : sunset}
+    else:
+        ######convert sunrise and sunset to hours + minutes + seconds
+        print("under construction")
+        return {'sunrise' : sunrise, 'sunset' : sunset}
 
-    # seconds in a day
+
+def get_sunrise_sunset(latitude, longitude, utc_offset, date, event):
+    ''' as time passes, the estimated sunrise and sunset times for this day change
+        this function uses a loop to find the time where the (time of day) and (estimated sunrise, sunset times) intersect '''
+    
     seconds_per_day = 60 * 60 * 24
 
-    # 
-
-
+    # get sunrise
+    for time_elapsed in range(1, seconds_per_day + 1):
+        if time_elapsed < estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since_midnight=time_elapsed, return_seconds=True)['sunrise']:
+            continue
+        else:
+            print('got sunrise')
+            sunrise_in_seconds = time_elapsed
+            break
+    # get sunset
+    for time_elapsed in range(1, seconds_per_day + 1):
+        if time_elapsed < estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since_midnight=time_elapsed, return_seconds=True)['sunset']:
+            continue
+        else:
+            print('got sunset')
+            sunset_in_seconds = time_elapsed
+            break
+    ######convert sunrise_in_seconds, sunset_in_seconds to datetime format
+    return sunrise_in_datetime, sunset_in_datetime
 
 if __name__ == '__main__':
     print('Well hello, Sonny.')
     print(time.localtime())
-    #get_sunrise_sunset()
+    get_sunrise_sunset(1,1,1,1,1)
  
