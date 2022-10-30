@@ -43,6 +43,7 @@ def geom_mean_long_sun(jul_cent):
     # math.fmod is recommended by the python documentation for floats
     return math.fmod((280.46646 + jul_cent * (36000.76983 + jul_cent * 0.0003032)), 360.0)
 
+
 def geom_mean_anom_sun(jul_cent):
     # the geometric mean anomaly of the sun
     # in degrees
@@ -70,12 +71,11 @@ def sun_true_anom(geom_mean_anom_sun, sun_eq_of_ctr):
     # in degrees
     return geom_mean_anom_sun + sun_eq_of_ctr
 
-def sun_rad_vector():
+
+def sun_rad_vector(eccent_earth_orbit, sun_true_anom):
     # the sun radius vector
     # in AUs
-    # I'm not sure if this is used for anything
-    print('oh hey the sun radius vector does something')
-    return None
+    return (1.000001018 * (1 - eccent_earth_orbit * eccent_earth_orbit)) / (1 + eccent_earth_orbit * math.cos(degrees_to_radians(sun_true_anom)))
 
 
 def sun_app_long(sun_true_long, julian_century):
@@ -83,6 +83,7 @@ def sun_app_long(sun_true_long, julian_century):
     # in degrees
     return sun_true_long - 0.00569 - 0.00478 * math.sin(degrees_to_radians(125.04 - 1934.136 * julian_century))
     
+
 
 def estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since_midnight, return_seconds = False):
     ''' estimates the apparent sunrise and sunset times
