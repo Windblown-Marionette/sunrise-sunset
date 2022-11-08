@@ -38,42 +38,42 @@ def julian_century(jul_day):
 
 
 def geom_mean_long_sun(jul_cent):
-    # the geometric mean of the longitude of the sun
+    # the geometric mean of the longitude of the Sun
     # in degrees
     # math.fmod is recommended by the python documentation for floats
     return math.fmod((280.46646 + jul_cent * (36000.76983 + jul_cent * 0.0003032)), 360.0)
 
 
 def geom_mean_anom_sun(jul_cent):
-    # the geometric mean anomaly of the sun
+    # the geometric mean anomaly of the Sun
     # in degrees
     return 357.52911 + jul_cent * (35999.05029 - 0.0001537 * jul_cent)
 
 
 def eccent_earth_orbit(jul_cent):
-    # the eccentricity of earth's orbit
+    # the eccentricity of Earth's orbit
     return 0.016708634 - jul_cent * (0.000042037 + 0.0000001267 * jul_cent)
 
 
 def sun_eq_of_ctr(geom_mean_anom_sun, jul_cent):
-    # the sun's equation of the center
+    # the Sun's equation of the center
     return math.sin(degrees_to_radians(geom_mean_anom_sun)) * (1.914602 - jul_cent * (0.004817 + 0.000014 * jul_cent))+math.sin(degrees_to_radians(2 * geom_mean_anom_sun)) * (0.019993 - 0.000101 * jul_cent)+math.sin(degrees_to_radians(3 * geom_mean_anom_sun)) * 0.000289
 
 
 def sun_true_long(geom_mean_long_sun, sun_eq_of_ctr):
-    # the true longitude of the sun
+    # the true longitude of the Sun
     # in degrees
     return geom_mean_long_sun + sun_eq_of_ctr
 
 
 def sun_true_anom(geom_mean_anom_sun, sun_eq_of_ctr):
-    # the true anomaly of the sun
+    # the true anomaly of the Sun
     # in degrees
     return geom_mean_anom_sun + sun_eq_of_ctr
 
 
 def sun_rad_vector(eccent_earth_orbit, sun_true_anom):
-    # the sun radius vector
+    # the Sun radius vector
     # in AUs
     return (1.000001018 * (1 - eccent_earth_orbit * eccent_earth_orbit)) / (1 + eccent_earth_orbit * math.cos(degrees_to_radians(sun_true_anom)))
 
@@ -90,8 +90,18 @@ def mean_obliq_ecliptic(julian_century):
     return 23 + (26 + ((21.448 - julian_century * (46.815 + julian_century * (0.00059 - julian_century * 0.001813)))) / 60) / 60
     
 
-def obliq_corr(julian_century):
-    
+def obliq_corr(mean_oblique_ecliptic, julian_century):
+    # I do not know what this term is
+    # in degrees
+    return mean_oblique_ecliptic + 0.00256 * math.cos(degrees_to_radians(125.04 - 0.136 * julian_century))
+
+
+def sun_rt_ascen(sun_app_long, obliq_corr):
+    # the right ascension of the Sun
+    # in degrees
+    return radians_to_degrees(math.arctan2(math.cos(degrees_to_radians(sun_app_long)), math.cos(degrees_to_radians(obliq_corr)) * math.sin(degrees_to_radians(sun_app_long))))
+
+
 def estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since_midnight, return_seconds = False):
     ''' estimates the apparent sunrise and sunset times
         inputs latitude, longitude, utc_offset, date
