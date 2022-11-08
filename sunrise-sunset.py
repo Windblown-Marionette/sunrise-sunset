@@ -82,9 +82,16 @@ def sun_app_long(sun_true_long, julian_century):
     # the sun's apparent longitude
     # in degrees
     return sun_true_long - 0.00569 - 0.00478 * math.sin(degrees_to_radians(125.04 - 1934.136 * julian_century))
+
+
+def mean_obliq_ecliptic(julian_century):
+    # the sun's mean obliquity of the ecliptic
+    # in degrees
+    return 23 + (26 + ((21.448 - julian_century * (46.815 + julian_century * (0.00059 - julian_century * 0.001813)))) / 60) / 60
     
 
-
+def obliq_corr(julian_century):
+    
 def estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since_midnight, return_seconds = False):
     ''' estimates the apparent sunrise and sunset times
         inputs latitude, longitude, utc_offset, date
