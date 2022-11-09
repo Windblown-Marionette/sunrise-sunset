@@ -116,7 +116,7 @@ def var_y(obliq_corr):
 def eq_of_time(geom_mean_long_sun, geom_mean_anom_sun, eccent_earth_orbit, var_y):
     # the equation of time
     # in minutes
-    return 4 * radians_to_degrees(var_y * math.sin(2 * degrees_to_radians(geom_mean_long_sun)) - 2 * eccent_earth_orbit * math.sin(degrees_to_radians(geom_mean_anom_sun)) + 4 * eccent_earth_orbit * var_y * math.sin(degrees_to_radians(J2)) * math.cos(2 * degrees_to_radians(geom_mean_long_sun)) - 0.5 * var_y * var_y * math.sin(4 * degrees_to_radians(geom_mean_long_sun)) - 1.25 * eccent_earth_orbit * eccent_earth_orbit * math.sin(2 * degrees_to_radians(geom_mean_anom_sun)))
+    return 4 * radians_to_degrees(var_y * math.sin(2 * degrees_to_radians(geom_mean_long_sun)) - 2 * eccent_earth_orbit * math.sin(degrees_to_radians(geom_mean_anom_sun)) + 4 * eccent_earth_orbit * var_y * math.sin(degrees_to_radians(geom_mean_anom_sun)) * math.cos(2 * degrees_to_radians(geom_mean_long_sun)) - 0.5 * var_y * var_y * math.sin(4 * degrees_to_radians(geom_mean_long_sun)) - 1.25 * eccent_earth_orbit * eccent_earth_orbit * math.sin(2 * degrees_to_radians(geom_mean_anom_sun)))
 
 
 def ha_sunrise(sun_declin, lattitude):
@@ -159,6 +159,7 @@ def get_sunrise_sunset(latitude, longitude, utc_offset, date, event):
     ''' as time passes, the estimated sunrise and sunset times for this day change
         this function uses a loop to find the time where the (time of day) and (estimated sunrise, sunset times) intersect '''
     
+    seconds_per_day = 60 * 60 * 24
 
     # get sunrise
     for time_elapsed in range(1, seconds_per_day + 1):
