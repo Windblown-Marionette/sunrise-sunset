@@ -102,6 +102,22 @@ def sun_rt_ascen(sun_app_long, obliq_corr):
     return radians_to_degrees(math.arctan2(math.cos(degrees_to_radians(sun_app_long)), math.cos(degrees_to_radians(obliq_corr)) * math.sin(degrees_to_radians(sun_app_long))))
 
 
+def sun_declin(sun_app_long, obliq_corr):
+    # the declination angle of the Sun
+    # in degrees
+    return radians_to_degrees(math.asin(math.sin(degrees_to_radians(obliq_corr)) * math.sin(degrees_to_radians(sun_app_long))))
+
+
+def var_y(obliq_corr):
+    # I do not know what this term is
+    return math.tan(degrees_to_radians(obliq_corr / 2)) * math.tan(degrees_to_radians(obliq_corr / 2))
+
+
+def eq_of_time(geom_mean_long_sun, geom_mean_anom_sun, eccent_earth_orbit, var_y):
+    # the equation of time
+    # in minutes
+    return 4 * radians_to_degrees(var_y * math.sin(2 * degrees_to_radians(geom_mean_long_sun)) - 2 * eccent_earth_orbit * math.sin(degrees_to_radians(geom_mean_anom_sun)) + 4 * eccent_earth_orbit * var_y * math.sin(degrees_to_radians(J2)) * math.cos(2 * degrees_to_radians(geom_mean_long_sun)) - 0.5 * var_y * var_y * math.sin(4 * degrees_to_radians(geom_mean_long_sun)) - 1.25 * eccent_earth_orbit * eccent_earth_orbit * math.sin(2 * degrees_to_radians(geom_mean_anom_sun)))
+
 def estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since_midnight, return_seconds = False):
     ''' estimates the apparent sunrise and sunset times
         inputs latitude, longitude, utc_offset, date
