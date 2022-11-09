@@ -118,6 +118,13 @@ def eq_of_time(geom_mean_long_sun, geom_mean_anom_sun, eccent_earth_orbit, var_y
     # in minutes
     return 4 * radians_to_degrees(var_y * math.sin(2 * degrees_to_radians(geom_mean_long_sun)) - 2 * eccent_earth_orbit * math.sin(degrees_to_radians(geom_mean_anom_sun)) + 4 * eccent_earth_orbit * var_y * math.sin(degrees_to_radians(J2)) * math.cos(2 * degrees_to_radians(geom_mean_long_sun)) - 0.5 * var_y * var_y * math.sin(4 * degrees_to_radians(geom_mean_long_sun)) - 1.25 * eccent_earth_orbit * eccent_earth_orbit * math.sin(2 * degrees_to_radians(geom_mean_anom_sun)))
 
+
+def ha_sunrise(sun_declin, lattitude):
+    # I do not know what this term is
+    # lattitude is + to North
+    # in degrees
+    return radians_to_degrees(math.acos(math.cos(degrees_to_radians(90.833)) / (math.cos(degrees_to_radians(lattitude)) * math.cos(degrees_to_radians(sun_declin))) - math.tan(degrees_to_radians(lattitude)) * math.tan(degrees_to_radians(sun_declin))))
+
 def estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since_midnight, return_seconds = False):
     ''' estimates the apparent sunrise and sunset times
         inputs latitude, longitude, utc_offset, date
