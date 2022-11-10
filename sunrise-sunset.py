@@ -131,7 +131,7 @@ def solar_noon(eq_of_time, longitude, time_zone):
     # https://greenbankobservatory.org/education/great-resources/lst-clock/
     # longitude is + to East
     # time zone is + to East
-    return (720 - 4 * longitude - V2 + time_zone * 60) / 1440
+    return (720 - 4 * longitude - eq_of_time + time_zone * 60) / 1440
 
 
 def sunrise_time(solar_noon, ha_sunrise):
@@ -160,12 +160,36 @@ def true_solar_time(seconds_since_midnight, eq_of_time, longitude, time_zone):
     math.fmod(seconds_since_midnight / 60 * 1440 + eq_of_time + 4 * longitude - 60 * time_zone, 1440)
 
 
-def hour_angle(true_sol_time):
+def hour_angle(true_solar_time):
     # in degrees
-    if(true_sol_time / 4 < 0):
-        return true_sol_time / 4 + 180
+    if(true_solar_time / 4 < 0):
+        return true_solar_time / 4 + 180
     else:
-        return true_sol_time / 4 - 180
+        return true_solar_time / 4 - 180
+
+
+def solar_zenith_angle(sun_declin, hour_angle, latitude):
+    # in degrees
+    # latitude is + to North
+    return radians_to_degrees(math.acos(math.sin(degrees_to_radians(latitude)) * math.sin(degrees_to_radians(sun_declin)) + math.cos(degrees_to_radians(latitude)) * math.cos(degrees_to_radians(sun_declin)) * math.cos(degrees_to_radians(hour_angle))))
+
+
+def solar_elevation_angle(solar_zenith_angle):
+    # in degrees
+    return 90 - solar_zenith_angle
+
+
+def approx_atmospheric_refraction(solar_elevation_angle):
+    # approximate atmospheric refraction
+    # in degrees
+    if solar_elevation_angle>85:
+        return 0
+    elif solar_elevation_angle > 5:
+        return 58.1 / math.tan(degrees_to_radians(solar_elevation_angle)) - 0.07 / (math.tan(degrees_to_radians(solar_elevation_angle)) ** 3) + 0.000086 / math.tan(degrees_to_radians(solar_elevation_angle)) ** 5
+    elif solar_elevation_angle > -0.575:
+        return 1735 + solar_elevation_angle * (-518.2 + solar_elevation_angle * (103.4 + solar_elevation_angle * (-12.79 + solar_elevation_angle * 0.711)))
+    else:
+        return -20.772 / math.tan(degrees_to_radians(solar_elevation_angle)) / 3600
 
 
 def estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since_midnight, return_seconds = False):
