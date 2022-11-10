@@ -125,6 +125,32 @@ def ha_sunrise(sun_declin, lattitude):
     # in degrees
     return radians_to_degrees(math.acos(math.cos(degrees_to_radians(90.833)) / (math.cos(degrees_to_radians(lattitude)) * math.cos(degrees_to_radians(sun_declin))) - math.tan(degrees_to_radians(lattitude)) * math.tan(degrees_to_radians(sun_declin))))
 
+
+def solar_noon(eq_of_time, longitude, time_zone):
+    # solar noon in LST, or Local Sidereal Time
+    # https://greenbankobservatory.org/education/great-resources/lst-clock/
+    # longitude is + to East
+    # time zone is + to East
+    return (720 - 4 * longitude - V2 + time_zone * 60) / 1440
+
+
+def sunrise_time(solar_noon, ha_sunrise):
+    # sunrise time in LST, or Local Sidereal Time
+    # https://greenbankobservatory.org/education/great-resources/lst-clock/
+    return solar_noon - ha_sunrise * 4 / 1440
+
+
+def sunset_time(solar_noon, ha_sunrise):
+    # sunset time in LST, or Local Sidereal Time
+    # https://greenbankobservatory.org/education/great-resources/lst-clock/
+    return solar_noon + ha_sunrise * 4 / 1440
+
+
+def sunlight_duration(ha_sunrise):
+    # in minutes
+    return 8 * ha_sunrise
+    
+
 def estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since_midnight, return_seconds = False):
     ''' estimates the apparent sunrise and sunset times
         inputs latitude, longitude, utc_offset, date
