@@ -149,7 +149,24 @@ def sunset_time(solar_noon, ha_sunrise):
 def sunlight_duration(ha_sunrise):
     # in minutes
     return 8 * ha_sunrise
-    
+
+
+def true_solar_time(seconds_since_midnight, eq_of_time, longitude, time_zone):
+    # in minutes
+    ##### seconds_since midnight may be the wrong variable for this
+    ##### so I'm converting it to minutes to match the 1440 which may be (60min/hr * 24hr)
+    # longitude is + to East
+    # time zone is + to East
+    math.fmod(seconds_since_midnight / 60 * 1440 + eq_of_time + 4 * longitude - 60 * time_zone, 1440)
+
+
+def hour_angle(true_sol_time):
+    # in degrees
+    if(true_sol_time / 4 < 0):
+        return true_sol_time / 4 + 180
+    else:
+        return true_sol_time / 4 - 180
+
 
 def estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since_midnight, return_seconds = False):
     ''' estimates the apparent sunrise and sunset times
