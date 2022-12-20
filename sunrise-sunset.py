@@ -247,8 +247,22 @@ def get_sunrise_sunset(latitude, longitude, utc_offset, date, event):
     ######convert sunrise_in_seconds, sunset_in_seconds to datetime format
     return sunrise_in_datetime, sunset_in_datetime
 
+
+def compare_to_expected_outputs():
+    # iterates through a list of the above calculation functions
+    # compares the outputs to the original spreadsheet's outputs
+    function_dictionary = {'radians_to_degrees' : {'function' : radians_to_degrees, 'input' : 2, 'spreadsheet_output': None},
+                           'degrees_to_radians' : {'function' : degrees_to_radians, 'input' : 2, 'spreadsheet_output': None}}
+    for function in function_dictionary.keys():
+        function_dictionary[function]['function_output'] = function_dictionary[function]['function'](function_dictionary[function]['input'])
+    for function in function_dictionary.keys():
+        print('Function:', function, ' | Input value:', function_dictionary[function]['input'], 
+        ' | Function output:', function_dictionary[function]['function_output'], 
+        ' | Spreadsheet output:', function_dictionary[function]['spreadsheet_output'])
+
+
 if __name__ == '__main__':
     print('Well hello, Sonny.')
     print(time.localtime())
-    get_sunrise_sunset(1,1,1,1,1)
- 
+    #get_sunrise_sunset(1,1,1,1,1)
+    compare_to_expected_outputs()
