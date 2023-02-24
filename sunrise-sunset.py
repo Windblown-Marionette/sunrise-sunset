@@ -154,7 +154,7 @@ def sunlight_duration(ha_sunrise):
 def true_solar_time(seconds_since_midnight, eq_of_time, longitude, time_zone):
     # in minutes
     ##### seconds_since midnight may be the wrong variable for this
-    ##### so I'm converting it to minutes to match the 1440 which may be (60min/hr * 24hr)
+    ##### so I will convert it to minutes since midnight to match the 1440, which may be (60min/hr * 24hr)
     # longitude is + to East
     # time zone is + to East
     math.fmod(seconds_since_midnight / 60 * 1440 + eq_of_time + 4 * longitude - 60 * time_zone, 1440)
@@ -190,6 +190,20 @@ def approx_atmospheric_refraction(solar_elevation_angle):
         return 1735 + solar_elevation_angle * (-518.2 + solar_elevation_angle * (103.4 + solar_elevation_angle * (-12.79 + solar_elevation_angle * 0.711)))
     else:
         return -20.772 / math.tan(degrees_to_radians(solar_elevation_angle)) / 3600
+
+
+def solar_elevation_using_atmospheric_refraction(solar_elevation_angle, approx_atmospheric_refraction):
+    # solar elevation corrected for atmospheric refraction
+    # in degrees
+    return solar_elevation_angle + approx_atmospheric_refraction
+
+
+def solar_azimuth_angle(latitude, sun_declin, hour_angle, solar_zenith_angle):
+    # in degrees clockwise from North
+    if hour_angle > 0:
+        return math.fmod(radians_to_degrees(math.acos(((math.sin(degrees_to_radians(latitude)) * math.cos(degrees_to_radians(solar_zenith_angle))) - math.sin(degrees_to_radians(sun_declin))) / (math.cos(degrees_to_radians(latitude)) * math.sin(degrees_to_radians(solar_zenith_angle))))) + 180, 360.0)
+    else:
+        return math.fmod(540 - radians_to_degrees(math.acos(((math.sin(degrees_to_radians(latitude)) * math.cos(degrees_to_radians(solar_zenith_angle))) - math.sin(degrees_to_radians(sun_declin))) / (math.cos(degrees_to_radians(latitude)) * math.sin(degrees_to_radians(solar_zenith_angle))))), 360.0)
 
 
 def estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since_midnight, return_seconds = False):
