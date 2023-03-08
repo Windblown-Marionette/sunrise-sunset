@@ -24,7 +24,8 @@ def degrees_to_radians(deg):
 
 
 def scale_seconds(seconds):
-    # scales seconds to fit within 0 - 1
+    # scales seconds to fit within 0 - 1 days
+    assert seconds < 60 * 60 * 24, 'Unexpected: more than a day\'s worth of seconds.'
     seconds_per_day = 60 * 60 * 24
     return seconds / seconds_per_day
 
@@ -266,13 +267,15 @@ def compare_to_expected_outputs():
     # iterates through a list of the above calculation functions
     # compares the outputs to the original spreadsheet's outputs
     function_dictionary = {'radians_to_degrees' : {'function' : radians_to_degrees, 'input' : 2, 'spreadsheet_output': None},
-                           'degrees_to_radians' : {'function' : degrees_to_radians, 'input' : 2, 'spreadsheet_output': None}}
+                           'degrees_to_radians' : {'function' : degrees_to_radians, 'input' : 2, 'spreadsheet_output': None},
+                           'scale_seconds': {'function' : scale_seconds, 'input' : 2, 'spreadsheet_output' : None}}
     for function in function_dictionary.keys():
         function_dictionary[function]['function_output'] = function_dictionary[function]['function'](function_dictionary[function]['input'])
     for function in function_dictionary.keys():
         print('Function:', function, ' | Input value:', function_dictionary[function]['input'], 
         ' | Function output:', function_dictionary[function]['function_output'], 
-        ' | Spreadsheet output:', function_dictionary[function]['spreadsheet_output'])
+        ' | Spreadsheet output:', function_dictionary[function]['spreadsheet_output'],
+        )
 
 
 if __name__ == '__main__':
