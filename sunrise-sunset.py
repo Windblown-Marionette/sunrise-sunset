@@ -266,11 +266,21 @@ def get_sunrise_sunset(latitude, longitude, utc_offset, date, event):
 def compare_to_expected_outputs():
     # iterates through a list of the above calculation functions
     # compares the outputs to the original spreadsheet's outputs
-    function_dictionary = {'radians_to_degrees' : {'function' : radians_to_degrees, 'input' : 2, 'spreadsheet_output': None},
-                           'degrees_to_radians' : {'function' : degrees_to_radians, 'input' : 2, 'spreadsheet_output': None},
-                           'scale_seconds': {'function' : scale_seconds, 'input' : 2, 'spreadsheet_output' : None}}
+    # the following values will be used to match the spreadsheet default for the top row: lat, long, time zone, date
+
+    lat = 40  # + to N
+    long = -105  # + to E
+    time_zone = -6  # + to E
+    date = 6/21/2010
+
+    function_dictionary = {'radians_to_degrees' : {'function' : radians_to_degrees, 'input' : [2], 'spreadsheet_output': None},
+                           'degrees_to_radians' : {'function' : degrees_to_radians, 'input' : [2], 'spreadsheet_output': None},
+                           'scale_seconds': {'function' : scale_seconds, 'input' : [2], 'spreadsheet_output' : None},
+                           'julian_day' : {'function' : julian_day, 'input' : [], 'spreadsheet_output' : None}
+                           def julian_day(days_since_epoch, seconds_scaled, utc_offset):
+}
     for function in function_dictionary.keys():
-        function_dictionary[function]['function_output'] = function_dictionary[function]['function'](function_dictionary[function]['input'])
+        function_dictionary[function]['function_output'] = function_dictionary[function]['function'](*function_dictionary[function]['input'])
     for function in function_dictionary.keys():
         print('Function:', function, ' | Input value:', function_dictionary[function]['input'], 
         ' | Function output:', function_dictionary[function]['function_output'], 
