@@ -14,6 +14,8 @@ import time
 import math
 from urllib.parse import _NetlocResultMixinStr
 
+SECONDS_PER_DAY = 60 * 60 * 24
+
 
 def radians_to_degrees(rad):
     return rad * (180 / math.pi)
@@ -25,16 +27,15 @@ def degrees_to_radians(deg):
 
 def scale_seconds(seconds):
     # scales seconds to fit within 0 - 1 days
-    assert seconds < 60 * 60 * 24, 'Unexpected: more than a day\'s worth of seconds.'
-    seconds_per_day = 60 * 60 * 24
-    return seconds / seconds_per_day
+    assert seconds < SECONDS_PER_DAY, 'Unexpected: more than a day\'s worth of seconds.'
+    return seconds / SECONDS_PER_DAY
 
 
 def julian_day(days_since_unix_epoch=None, utc_offset=0):
     epoch_displacement = 25569  # distance from excel epoch to time.time epoch (unix epoch, January 1st 1970 00:00:00) 
     julian_date_offset = 2415018.5  # in-built conversion from excel epoch (12/30/1899) to julian days
     if days_since_unix_epoch is None:
-        days_since_unix_epoch = time.time() / (60 * 60 * 24)  # time.time_ns() may improve accuracy
+        days_since_unix_epoch = time.time() / (SECONDS_PER_DAY)  # time.time_ns() may improve accuracy
     return days_since_unix_epoch + epoch_displacement + julian_date_offset - (utc_offset / 24)
 
 
@@ -244,11 +245,9 @@ def estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since
 def get_sunrise_sunset(latitude, longitude, utc_offset, date, event):
     ''' as time passes, the estimated sunrise and sunset times for this day change
         this function uses a loop to find the time where the (time of day) and (estimated sunrise, sunset times) intersect '''
-    
-    seconds_per_day = 60 * 60 * 24
 
     # get sunrise
-    for time_elapsed in range(1, seconds_per_day + 1):
+    for time_elapsed in range(1, SECONDS_PER_DAY + 1):
         if time_elapsed < estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since_midnight=time_elapsed, return_seconds=True)['sunrise']:
             continue
         else:
@@ -256,7 +255,7 @@ def get_sunrise_sunset(latitude, longitude, utc_offset, date, event):
             sunrise_in_seconds = time_elapsed
             break
     # get sunset
-    for time_elapsed in range(1, seconds_per_day + 1):
+    for time_elapsed in range(1, SECONDS_PER_DAY + 1):
         if time_elapsed < estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since_midnight=time_elapsed, return_seconds=True)['sunset']:
             continue
         else:
@@ -276,7 +275,7 @@ def compare_to_expected_outputs():
     long = -105  # + to E
     time_zone = -6  # + to E
     epoch_sample_time = time.strptime('6 21 2010 6', '%m %d %Y %M')  # 6/21/2010 and 6 minutes
-    epoch_sample_time = time.mktime(epoch_sample_time) / (60 * 60 * 24)  # converted to seconds and then to days
+    epoch_sample_time = time.mktime(epoch_sample_time) / (SECONDS_PER_DAY)  # converted to seconds and then to days
     
     function_dictionary = {'radians_to_degrees' : {'function' : radians_to_degrees, 'input' : [2], 'spreadsheet_output': None},
                            'degrees_to_radians' : {'function' : degrees_to_radians, 'input' : [2], 'spreadsheet_output': None},
