@@ -30,8 +30,12 @@ def scale_seconds(seconds):
     return seconds / seconds_per_day
 
 
-def julian_day(days_since_epoch, seconds_scaled, utc_offset):
-    return days_since_epoch + 2415018.5 + seconds_scaled - (utc_offset / 24)
+def julian_day(days_since_unix_epoch=None, utc_offset=0):
+    epoch_displacement = 25569  # distance from excel epoch to time.time epoch (unix epoch, January 1st 1970 00:00:00) 
+    julian_date_offset = 2415018.5  # in-built conversion from excel epoch (12/30/1899) to julian days
+    if days_since_unix_epoch is None:
+        days_since_unix_epoch = time.time() / (60 * 60 * 24)  # time.time_ns() may improve accuracy
+    return days_since_unix_epoch + epoch_displacement + julian_date_offset - (utc_offset / 24)
 
 
 def julian_century(jul_day):
@@ -271,14 +275,14 @@ def compare_to_expected_outputs():
     lat = 40  # + to N
     long = -105  # + to E
     time_zone = -6  # + to E
-    date = 6/21/2010
-
+    epoch_sample_time = time.strptime('6 21 2010 6', '%m %d %Y %M')  # 6/21/2010 and 6 minutes
+    epoch_sample_time = time.mktime(epoch_sample_time) / (60 * 60 * 24)  # converted to seconds and then to days
+    
     function_dictionary = {'radians_to_degrees' : {'function' : radians_to_degrees, 'input' : [2], 'spreadsheet_output': None},
                            'degrees_to_radians' : {'function' : degrees_to_radians, 'input' : [2], 'spreadsheet_output': None},
                            'scale_seconds': {'function' : scale_seconds, 'input' : [2], 'spreadsheet_output' : None},
-                           'julian_day' : {'function' : julian_day, 'input' : [], 'spreadsheet_output' : None}
-                           def julian_day(days_since_epoch, seconds_scaled, utc_offset):
-}
+                           'julian_day' : {'function' : julian_day, 'input' : [epoch_sample_time, time_zone], 'spreadsheet_output' : 2455368.75}}
+
     for function in function_dictionary.keys():
         function_dictionary[function]['function_output'] = function_dictionary[function]['function'](*function_dictionary[function]['input'])
     for function in function_dictionary.keys():
