@@ -12,7 +12,6 @@
 
 import time
 import math
-from urllib.parse import _NetlocResultMixinStr
 
 SECONDS_PER_DAY = 60 * 60 * 24
 
