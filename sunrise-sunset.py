@@ -30,16 +30,20 @@ def scale_seconds(seconds):
     return seconds / SECONDS_PER_DAY
 
 
-def julian_day(time_string = None, utc_offset=0):
-    # time_string will follow the order 'year month day hour minute second'
-    # example: time_string = '2023 07 16 13 25 02'
-    # further customization is available in the time.strptime() documentation
-    time.strptime(time_string,'%Y %m %d %S')
-    
+def julian_day(time_string = None, utc_offset = 0):
     epoch_displacement = 25569  # distance from excel epoch to time.time epoch (unix epoch, January 1st 1970 00:00:00) 
     julian_date_offset = 2415018.5  # in-built conversion from excel epoch (12/30/1899) to julian days
+
     if time_string is None:
-        days_since_unix_epoch = time.time() / (SECONDS_PER_DAY)  # time.time_ns() may improve accuracy
+        days_since_unix_epoch = time.time() / SECONDS_PER_DAY  # time.time_ns() may improve accuracy
+    else:
+            # time_string will follow the order 'year month day hour minute second'
+            # example: time_string = '2023 07 16 13 25 02' would be July 16, 2023 at 1:25 PM and 2 seconds
+            # further customization is available in the time.strptime() documentation
+            input_time = time.strptime(time_string,'%Y %m %d %H %M %S') # returns a struct_time
+            input_time_s = time.mktime(input_time) # converts to seconds since unix epoch
+            days_since_unix_epoch = input_time_s / SECONDS_PER_DAY
+
     return days_since_unix_epoch + epoch_displacement + julian_date_offset - (utc_offset / 24)
 
 
