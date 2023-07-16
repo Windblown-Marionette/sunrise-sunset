@@ -243,12 +243,32 @@ def estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since
         return {'sunrise' : sunrise, 'sunset' : sunset}
 
 
-def estimate_sunrise_sunset_mk2():
+def estimate_sunrise_sunset_mk2(longitude_, lattitude_, time_zone_):
     # starting at the last functions needed
     # sunrise_time() and sunset_time()
     # and fulfilling the chain of requirements in an upstream direction
-    solar_noon_ = solar_noon(
-    ha_sunrise_ = ha_sunrise(
+    # anything that is not created by a function will be listed as an input variable
+    
+    julian_day_ = julian_day(days_since_unix_epoch=days_since_unix_epoch_, utc_offset = utc_offset_)
+    julian_century_ = julian_century(jul_day=julian_day_)
+    geom_mean_anom_sun_ = geom_mean_anom_sun(jul_cent=julian_century_)
+    sun_eq_of_ctr_ = sun_eq_of_ctr(geom_mean_anom_sun=geom_mean_anom_sun_,julian_century = julian_century_)
+
+    mean_obliq_ecliptic_ = mean_obliq_ecliptic(julian_century=julian_century_)
+    geom_mean_long_sun_ = geom_mean_long_sun(jul_cent=julian_century_)
+    sun_true_long_ = sun_true_long(geom_mean_long_sun=geom_mean_long_sun_,sun_eq_of_ctr=sun_eq_of_ctr_)
+    
+   
+    eccent_earth_orbit_ = eccent_earth_orbit(jul_cent=julian_century_)
+    obliq_corr_ = obliq_corr(mean_oblique_ecliptic=mean_obliq_ecliptic_, julian_century=julian_century_)
+    sun_app_long_ = sun_app_long(sun_true_long=sun_true_long_,julian_century=julian_century_)
+
+    eq_of_time_ = eq_of_time(geom_mean_long_sun=geom_mean_long_sun_, geom_mean_anom_sun=geom_mean_anom_sun_, eccent_earth_orbit=eccent_earth_orbit_)
+    sun_declin_ = sun_declin(sun_app_long=sun_app_long_,obliq_corr=obliq_corr_)
+
+    solar_noon_ = solar_noon(eq_of_time=eq_of_time_,longitude=longitude_,time_zone=time_zone_)
+    ha_sunrise_ = ha_sunrise(sun_declin=sun_declin_,lattitude=lattitude_)
+
     print(sunrise_time(solar_noon_, ha_sunrise_))
     print(sunset_time(solar_noon,))
 
