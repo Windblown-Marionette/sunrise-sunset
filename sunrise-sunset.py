@@ -211,6 +211,8 @@ def solar_azimuth_angle(latitude, sun_declin, hour_angle, solar_zenith_angle):
         return math.fmod(540 - radians_to_degrees(math.acos(((math.sin(degrees_to_radians(latitude)) * math.cos(degrees_to_radians(solar_zenith_angle))) - math.sin(degrees_to_radians(sun_declin))) / (math.cos(degrees_to_radians(latitude)) * math.sin(degrees_to_radians(solar_zenith_angle))))), 360.0)
 
 
+
+
 def estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since_midnight, return_seconds = False):
     ''' estimates the apparent sunrise and sunset times
         inputs latitude, longitude, utc_offset, date
@@ -239,6 +241,16 @@ def estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since
         ######convert sunrise and sunset to hours + minutes + seconds
         print("under construction")
         return {'sunrise' : sunrise, 'sunset' : sunset}
+
+
+def estimate_sunrise_sunset_mk2():
+    # starting at the last functions needed
+    # sunrise_time() and sunset_time()
+    # and fulfilling the chain of requirements in an upstream direction
+    solar_noon_ = solar_noon(
+    ha_sunrise_ = ha_sunrise(
+    print(sunrise_time(solar_noon_, ha_sunrise_))
+    print(sunset_time(solar_noon,))
 
 
 def get_sunrise_sunset(latitude, longitude, utc_offset, date, event):
