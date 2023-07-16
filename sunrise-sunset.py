@@ -262,6 +262,8 @@ def get_sunrise_sunset(latitude, longitude, utc_offset, date, event):
             sunset_in_seconds = time_elapsed
             break
     ######convert sunrise_in_seconds, sunset_in_seconds to datetime format
+    sunrise_in_datetime = 99999
+    sunset_in_datetime = 9999
     return sunrise_in_datetime, sunset_in_datetime
 
 
@@ -269,6 +271,7 @@ def compare_to_expected_outputs():
     # iterates through a list of the above calculation functions
     # compares the outputs to the original spreadsheet's outputs
     # the following values will be used to match the spreadsheet default for the top row: lat, long, time zone, date
+    # this comes from the NOAA_Solar_Calculations_day.xls file's first row of data
 
     lat = 40  # + to N
     long = -105  # + to E
@@ -276,51 +279,52 @@ def compare_to_expected_outputs():
     epoch_sample_time = time.strptime('6 21 2010 6', '%m %d %Y %M')  # 6/21/2010 and 6 minutes
     epoch_sample_time = time.mktime(epoch_sample_time) / (SECONDS_PER_DAY)  # converted to seconds and then to days
     
-    function_dictionary = {'radians_to_degrees' : {'function' : radians_to_degrees, 'input' : [2], 'spreadsheet_output': None},
-                           'degrees_to_radians' : {'function' : degrees_to_radians, 'input' : [2], 'spreadsheet_output': None},
-                           'scale_seconds': {'function' : scale_seconds, 'input' : [2], 'spreadsheet_output' : None},
-                           'julian_day' : {'function' : julian_day, 'input' : [epoch_sample_time, time_zone], 'spreadsheet_output' : 2455368.75},
-                           'julian_century' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'geom_mean_long_sun' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'geom_mean_anom_sun' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'eccent_earth_orbit' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'sun_eq_of_ctr' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'sun_true_long' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'sun_true_anom' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'sun_rad_vector' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'sun_app_long' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'mean_obliq_ecliptic' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'obliq_corr' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'sun_rt_ascen' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'sun_declin' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'var_y' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'eq_of_time' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'ha_sunrise' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'solar_noon' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'sunrise_time' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'sunset_time' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'sunlight_duration' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'true_solar_time' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'hour_angle' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'solar_zenith_angle' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'solar_elevation_angle' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'approx_atmospheric_refraction' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'solar_elevation_using_atmospheric_refraction' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'solar_azimuth_angle' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           'solar_azimuth_angle' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                           }
+    excessive_writing =     '''function_dictionary = {'radians_to_degrees' : {'function' : radians_to_degrees, 'input' : [2], 'spreadsheet_output': None},
+                                'degrees_to_radians' : {'function' : degrees_to_radians, 'input' : [2], 'spreadsheet_output': None},
+                                'scale_seconds': {'function' : scale_seconds, 'input' : [2], 'spreadsheet_output' : None},
+                                'julian_day' : {'function' : julian_day, 'input' : [epoch_sample_time, time_zone], 'spreadsheet_output' : 2455368.75},
+                                'julian_century' : {'function' : julian_century, 'input' : [julian], 'spreadsheet_output' : },
+                                'geom_mean_long_sun' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'geom_mean_anom_sun' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'eccent_earth_orbit' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'sun_eq_of_ctr' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'sun_true_long' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'sun_true_anom' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'sun_rad_vector' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'sun_app_long' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'mean_obliq_ecliptic' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'obliq_corr' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'sun_rt_ascen' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'sun_declin' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'var_y' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'eq_of_time' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'ha_sunrise' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'solar_noon' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'sunrise_time' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'sunset_time' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'sunlight_duration' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'true_solar_time' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'hour_angle' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'solar_zenith_angle' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'solar_elevation_angle' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'approx_atmospheric_refraction' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'solar_elevation_using_atmospheric_refraction' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'solar_azimuth_angle' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                'solar_azimuth_angle' : {'function' : , 'input' : , 'spreadsheet_output' : },
+                                }
 
-    for function in function_dictionary.keys():
-        function_dictionary[function]['function_output'] = function_dictionary[function]['function'](*function_dictionary[function]['input'])
-    for function in function_dictionary.keys():
-        print('Function:', function, ' | Input value:', function_dictionary[function]['input'], 
-        ' | Function output:', function_dictionary[function]['function_output'], 
-        ' | Spreadsheet output:', function_dictionary[function]['spreadsheet_output'],
-        )
+                            for function in function_dictionary.keys():
+                                function_dictionary[function]['function_output'] = function_dictionary[function]['function'](*function_dictionary[function]['input'])
+                            for function in function_dictionary.keys():
+                                print('Function:', function, ' | Input value:', function_dictionary[function]['input'], 
+                                ' | Function output:', function_dictionary[function]['function_output'], 
+                                ' | Spreadsheet output:', function_dictionary[function]['spreadsheet_output'],
+                                )'''
+    return None
 
 
 if __name__ == '__main__':
-    print('Well hello, Sonny.')
+    #print('Well hello, Sonny.')
     print(time.localtime())
-    #get_sunrise_sunset(1,1,1,1,1)
-    compare_to_expected_outputs()
+    estimate_sunrise_sunset(0,0,0,time.localtime(),0,False)
+    #compare_to_expected_outputs()
