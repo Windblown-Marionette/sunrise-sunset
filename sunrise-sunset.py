@@ -30,10 +30,15 @@ def scale_seconds(seconds):
     return seconds / SECONDS_PER_DAY
 
 
-def julian_day(days_since_unix_epoch=None, utc_offset=0):
+def julian_day(time_string = None, utc_offset=0):
+    # time_string will follow the order 'year month day hour minute second'
+    # example: time_string = '2023 07 16 13 25 02'
+    # further customization is available in the time.strptime() documentation
+    time.strptime(time_string,'%Y %m %d %S')
+    
     epoch_displacement = 25569  # distance from excel epoch to time.time epoch (unix epoch, January 1st 1970 00:00:00) 
     julian_date_offset = 2415018.5  # in-built conversion from excel epoch (12/30/1899) to julian days
-    if days_since_unix_epoch is None:
+    if time_string is None:
         days_since_unix_epoch = time.time() / (SECONDS_PER_DAY)  # time.time_ns() may improve accuracy
     return days_since_unix_epoch + epoch_displacement + julian_date_offset - (utc_offset / 24)
 
@@ -243,13 +248,15 @@ def estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since
         return {'sunrise' : sunrise, 'sunset' : sunset}
 
 
-def estimate_sunrise_sunset_mk2(longitude_, lattitude_, time_zone_):
+def estimate_sunrise_sunset_mk2(longitude_, lattitude_, time_in_struct_time_, time_zone_):
     # starting at the last functions needed
     # sunrise_time() and sunset_time()
     # and fulfilling the chain of requirements in an upstream direction
     # anything that is not created by a function will be listed as an input variable
+
+    struct_time()
     
-    julian_day_ = julian_day(days_since_unix_epoch=days_since_unix_epoch_, utc_offset = utc_offset_)
+    julian_day_ = julian_day(days_since_unix_epoch=days_since_unix_epoch_, utc_offset = time_zone_)
     julian_century_ = julian_century(jul_day=julian_day_)
     geom_mean_anom_sun_ = geom_mean_anom_sun(jul_cent=julian_century_)
     sun_eq_of_ctr_ = sun_eq_of_ctr(geom_mean_anom_sun=geom_mean_anom_sun_,julian_century = julian_century_)
