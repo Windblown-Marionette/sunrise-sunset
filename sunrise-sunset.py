@@ -47,31 +47,31 @@ def julian_day(time_string = None, utc_offset = 0):
     return days_since_unix_epoch + epoch_displacement + julian_date_offset - (utc_offset / 24)
 
 
-def julian_century(jul_day):
-    return (jul_day - 2451545) / 36525
+def julian_century(julian_day):
+    return (julian_day - 2451545) / 36525
 
 
-def geom_mean_long_sun(jul_cent):
+def geom_mean_long_sun(julian_century):
     # the geometric mean of the longitude of the Sun
     # in degrees
     # math.fmod is recommended by the python documentation for floats
-    return math.fmod((280.46646 + jul_cent * (36000.76983 + jul_cent * 0.0003032)), 360.0)
+    return math.fmod((280.46646 + julian_century * (36000.76983 + julian_century * 0.0003032)), 360.0)
 
 
-def geom_mean_anom_sun(jul_cent):
+def geom_mean_anom_sun(julian_century):
     # the geometric mean anomaly of the Sun
     # in degrees
-    return 357.52911 + jul_cent * (35999.05029 - 0.0001537 * jul_cent)
+    return 357.52911 + julian_century * (35999.05029 - 0.0001537 * julian_century)
 
 
-def eccent_earth_orbit(jul_cent):
+def eccent_earth_orbit(julian_century):
     # the eccentricity of Earth's orbit
-    return 0.016708634 - jul_cent * (0.000042037 + 0.0000001267 * jul_cent)
+    return 0.016708634 - julian_century * (0.000042037 + 0.0000001267 * julian_century)
 
 
-def sun_eq_of_ctr(geom_mean_anom_sun, jul_cent):
+def sun_eq_of_ctr(geom_mean_anom_sun, julian_century):
     # the Sun's equation of the center
-    return math.sin(degrees_to_radians(geom_mean_anom_sun)) * (1.914602 - jul_cent * (0.004817 + 0.000014 * jul_cent))+math.sin(degrees_to_radians(2 * geom_mean_anom_sun)) * (0.019993 - 0.000101 * jul_cent)+math.sin(degrees_to_radians(3 * geom_mean_anom_sun)) * 0.000289
+    return math.sin(degrees_to_radians(geom_mean_anom_sun)) * (1.914602 - julian_century * (0.004817 + 0.000014 * julian_century))+math.sin(degrees_to_radians(2 * geom_mean_anom_sun)) * (0.019993 - 0.000101 * julian_century)+math.sin(degrees_to_radians(3 * geom_mean_anom_sun)) * 0.000289
 
 
 def sun_true_long(geom_mean_long_sun, sun_eq_of_ctr):
@@ -252,36 +252,38 @@ def estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since
         return {'sunrise' : sunrise, 'sunset' : sunset}
 
 
-def estimate_sunrise_sunset_mk2(longitude_, lattitude_, time_in_struct_time_, time_zone_):
-    # starting at the last functions needed
-    # sunrise_time() and sunset_time()
-    # and fulfilling the chain of requirements in an upstream direction
-    # anything that is not created by a function will be listed as an input variable
+def estimate_sunrise_sunset_mk2(longitude_, lattitude_, time_string_, time_zone_):
 
-    struct_time()
+    # longitude_ and lattitude_ will be int values, Longitude_ is + to East and Lattitude is + to North
+
+    # time_string will follow the order 'year month day hour minute second'
+    # example: time_string = '2023 07 16 13 25 02' would be July 16, 2023 at 1:25 PM and 2 seconds
+
     
-    julian_day_ = julian_day(days_since_unix_epoch=days_since_unix_epoch_, utc_offset = time_zone_)
-    julian_century_ = julian_century(jul_day=julian_day_)
-    geom_mean_anom_sun_ = geom_mean_anom_sun(jul_cent=julian_century_)
+    
+    julian_day_ = julian_day(time_string=time_string_, utc_offset=time_zone_)
+    julian_century_ = julian_century(julian_day=julian_day_)
+    geom_mean_anom_sun_ = geom_mean_anom_sun(julian_century=julian_century_)
     sun_eq_of_ctr_ = sun_eq_of_ctr(geom_mean_anom_sun=geom_mean_anom_sun_,julian_century = julian_century_)
 
     mean_obliq_ecliptic_ = mean_obliq_ecliptic(julian_century=julian_century_)
-    geom_mean_long_sun_ = geom_mean_long_sun(jul_cent=julian_century_)
+    geom_mean_long_sun_ = geom_mean_long_sun(julian_century=julian_century_)
     sun_true_long_ = sun_true_long(geom_mean_long_sun=geom_mean_long_sun_,sun_eq_of_ctr=sun_eq_of_ctr_)
     
    
-    eccent_earth_orbit_ = eccent_earth_orbit(jul_cent=julian_century_)
+    eccent_earth_orbit_ = eccent_earth_orbit(julian_century=julian_century_)
     obliq_corr_ = obliq_corr(mean_oblique_ecliptic=mean_obliq_ecliptic_, julian_century=julian_century_)
     sun_app_long_ = sun_app_long(sun_true_long=sun_true_long_,julian_century=julian_century_)
+    var_y_ = var_y(obliq_corr=obliq_corr_)
 
-    eq_of_time_ = eq_of_time(geom_mean_long_sun=geom_mean_long_sun_, geom_mean_anom_sun=geom_mean_anom_sun_, eccent_earth_orbit=eccent_earth_orbit_)
+    eq_of_time_ = eq_of_time(geom_mean_long_sun=geom_mean_long_sun_, geom_mean_anom_sun=geom_mean_anom_sun_, eccent_earth_orbit=eccent_earth_orbit_, var_y=var_y_)
     sun_declin_ = sun_declin(sun_app_long=sun_app_long_,obliq_corr=obliq_corr_)
 
     solar_noon_ = solar_noon(eq_of_time=eq_of_time_,longitude=longitude_,time_zone=time_zone_)
     ha_sunrise_ = ha_sunrise(sun_declin=sun_declin_,lattitude=lattitude_)
 
     print(sunrise_time(solar_noon_, ha_sunrise_))
-    print(sunset_time(solar_noon,))
+    print(sunset_time(solar_noon_, ha_sunrise_))
 
 
 def get_sunrise_sunset(latitude, longitude, utc_offset, date, event):
@@ -371,3 +373,6 @@ if __name__ == '__main__':
     print(time.localtime())
     estimate_sunrise_sunset(0,0,0,time.localtime(),0,False)
     #compare_to_expected_outputs()
+    print('oh I hope this works on the first try')
+    estimate_sunrise_sunset_mk2(-105, 40, "2010 1 1 12 0 0", -7)
+    #print()
