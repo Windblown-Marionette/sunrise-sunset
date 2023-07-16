@@ -285,6 +285,15 @@ def estimate_sunrise_sunset_mk2(longitude_, lattitude_, time_string_, time_zone_
     print(sunrise_time(solar_noon_, ha_sunrise_))
     print(sunset_time(solar_noon_, ha_sunrise_))
 
+    # sunrise_time and sunset_time are in LST, and seem to be expressed as floats spanning 0 to 1
+    # for a very questionable conversion to make proof-of-concept results, I will multiply this LST day length fraction with a 24HR day
+    print('roughly... ')
+    rise_rough_s = int(sunrise_time(solar_noon_, ha_sunrise_) * SECONDS_PER_DAY)
+    sunrise_estimate_rough = time.strptime(f'{(rise_rough_s // (60 * 60)) - time_zone_} {(rise_rough_s // 60) % 60} {rise_rough_s % 60}', '%H %M %S')
+    print(f'sunrise time: {sunrise_estimate_rough}')
+    set_rough_s = int(sunset_time(solar_noon_, ha_sunrise_) * SECONDS_PER_DAY)
+    sunset_estimate_rough = time.strptime(f'{(set_rough_s // (60 * 60)) - time_zone_} {(set_rough_s // 60) % 60} {set_rough_s % 60}', '%H %M %S')
+    print(f'sunset time: {sunset_estimate_rough}')
 
 def get_sunrise_sunset(latitude, longitude, utc_offset, date, event):
     ''' as time passes, the estimated sunrise and sunset times for this day change
