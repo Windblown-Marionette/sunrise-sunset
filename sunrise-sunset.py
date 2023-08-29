@@ -220,7 +220,7 @@ def solar_azimuth_angle(latitude, sun_declin, hour_angle, solar_zenith_angle):
         return math.fmod(540 - radians_to_degrees(math.acos(((math.sin(degrees_to_radians(latitude)) * math.cos(degrees_to_radians(solar_zenith_angle))) - math.sin(degrees_to_radians(sun_declin))) / (math.cos(degrees_to_radians(latitude)) * math.sin(degrees_to_radians(solar_zenith_angle))))), 360.0)
 
 
-def estimate_sunrise_sunset_mk2(longitude_, latitude_, time_string_, time_zone_):
+def estimate_sunrise_sunset_mk2(longitude_, latitude_, time_string_, time_zone_, is_dst):
     # longitude_ and latitude_ will be int values, Longitude_ is + to East and latitude is + to North
 
     # time_string will follow the order 'year month day hour minute second'
@@ -251,26 +251,35 @@ def estimate_sunrise_sunset_mk2(longitude_, latitude_, time_string_, time_zone_)
     print(sunset_time(solar_noon_, ha_sunrise_))
 
     # sunrise_time and sunset_time are in LST, and seem to be expressed as floats spanning 0 to 1
-    # for a very questionable conversion to make proof-of-concept results, I will multiply this LST day length fraction with a 24HR day
+    # for a very questionable conversion to make proof-of-concept results
+    # I will multiply this LST day length fraction with a 24HR day
     print('roughly... ')
     rise_rough_s = int(sunrise_time(solar_noon_, ha_sunrise_) * SECONDS_PER_DAY)
-    sunrise_estimate_rough = time.strptime(
-        f'{(rise_rough_s // (60 * 60)) - time_zone_} {(rise_rough_s // 60) % 60} {rise_rough_s % 60}', '%H %M %S')
-    print(f'sunrise time: {sunrise_estimate_rough}')
     set_rough_s = int(sunset_time(solar_noon_, ha_sunrise_) * SECONDS_PER_DAY)
+    if is_dst:
+        rise_rough_s += 3600
+        set_rough_s += 3600
+
+    sunrise_estimate_rough = time.strptime(
+        f'{rise_rough_s // (60 * 60)} {(rise_rough_s // 60) % 60} {rise_rough_s % 60}',
+        '%H %M %S')
+    print(f'sunrise time: {sunrise_estimate_rough}')
+
     sunset_estimate_rough = time.strptime(
-        f'{(set_rough_s // (60 * 60)) - time_zone_} {(set_rough_s // 60) % 60} {set_rough_s % 60}', '%H %M %S')
+        f'{set_rough_s // (60 * 60)} {(set_rough_s // 60) % 60} {set_rough_s % 60}',
+        '%H %M %S')
     print(f'sunset time: {sunset_estimate_rough}')
 
 
 def get_sunrise_sunset(latitude, longitude, utc_offset, date, event):
-    ''' as time passes, the estimated sunrise and sunset times for this day change
-        this function uses a loop to find the time where the (time of day) and (estimated sunrise, sunset times) intersect '''
+    # as time passes, the estimated sunrise and sunset times for this day change
+    # this function uses a loop to find the point in time
+    # when the (time of day) and (estimated sunrise, sunset times) intersect
 
     # get sunrise
     for time_elapsed in range(1, SECONDS_PER_DAY + 1):
         if time_elapsed < \
-                estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since_midnight=time_elapsed,
+                estimate_sunrise_sunset_mk2(latitude, longitude, utc_offset, date, seconds_since_midnight=time_elapsed,
                                         return_seconds=True)['sunrise']:
             continue
         else:
@@ -280,7 +289,7 @@ def get_sunrise_sunset(latitude, longitude, utc_offset, date, event):
     # get sunset
     for time_elapsed in range(1, SECONDS_PER_DAY + 1):
         if time_elapsed < \
-                estimate_sunrise_sunset(latitude, longitude, utc_offset, date, seconds_since_midnight=time_elapsed,
+                estimate_sunrise_sunset_mk2(latitude, longitude, utc_offset, date, seconds_since_midnight=time_elapsed,
                                         return_seconds=True)['sunset']:
             continue
         else:
@@ -293,69 +302,14 @@ def get_sunrise_sunset(latitude, longitude, utc_offset, date, event):
     return sunrise_in_datetime, sunset_in_datetime
 
 
-def compare_to_expected_outputs():
-    # iterates through a list of the above calculation functions
-    # compares the outputs to the original spreadsheet's outputs
-    # the following values will be used to match the spreadsheet default for the top row: lat, long, time zone, date
-    # this comes from the NOAA_Solar_Calculations_day.xls file's first row of data
-
-    lat = 40  # + to N
-    long = -105  # + to E
-    time_zone = -6  # + to E
-    epoch_sample_time = time.strptime('6 21 2010 6', '%m %d %Y %M')  # 6/21/2010 and 6 minutes
-    epoch_sample_time = time.mktime(epoch_sample_time) / (SECONDS_PER_DAY)  # converted to seconds and then to days
-
-    excessive_writing = '''function_dictionary = {'radians_to_degrees' : {'function' : radians_to_degrees, 'input' : [2], 'spreadsheet_output': None},
-                                'degrees_to_radians' : {'function' : degrees_to_radians, 'input' : [2], 'spreadsheet_output': None},
-                                'scale_seconds': {'function' : scale_seconds, 'input' : [2], 'spreadsheet_output' : None},
-                                'julian_day' : {'function' : julian_day, 'input' : [epoch_sample_time, time_zone], 'spreadsheet_output' : 2455368.75},
-                                'julian_century' : {'function' : julian_century, 'input' : [julian_day(epoch_sample_time, time_zone)], 'spreadsheet_output' : },
-                                'geom_mean_long_sun' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'geom_mean_anom_sun' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'eccent_earth_orbit' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'sun_eq_of_ctr' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'sun_true_long' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'sun_true_anom' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'sun_rad_vector' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'sun_app_long' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'mean_obliq_ecliptic' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'obliq_corr' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'sun_rt_ascen' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'sun_declin' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'var_y' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'eq_of_time' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'ha_sunrise' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'solar_noon' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'sunrise_time' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'sunset_time' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'sunlight_duration' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'true_solar_time' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'hour_angle' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'solar_zenith_angle' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'solar_elevation_angle' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'approx_atmospheric_refraction' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'solar_elevation_using_atmospheric_refraction' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'solar_azimuth_angle' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                'solar_azimuth_angle' : {'function' : , 'input' : , 'spreadsheet_output' : },
-                                }
-
-                            for function in function_dictionary.keys():
-                                function_dictionary[function]['function_output'] = function_dictionary[function]['function'](*function_dictionary[function]['input'])
-                            for function in function_dictionary.keys():
-                                print('Function:', function, ' | Input value:', function_dictionary[function]['input'], 
-                                ' | Function output:', function_dictionary[function]['function_output'], 
-                                ' | Spreadsheet output:', function_dictionary[function]['spreadsheet_output'],
-                                )'''
-    return None
-
-
 if __name__ == '__main__':
-    # print('Well hello, Sonny.')
-    print(time.localtime())
-    estimate_sunrise_sunset(0, 0, 0, time.localtime(), 0, False)
-    # compare_to_expected_outputs()
-    print('oh I hope this works on the first try')
-    estimate_sunrise_sunset_mk2(-105, 40, "2010 1 1 12 0 0", -7)
-    # print()
-if __name__ == '__main__':
-    
+    print('Local time is', time.localtime())
+    print('Please provide a time in the format "year month day hour minute second"')
+    print('If no time is provided, the system time will be used')
+    time_used = input()
+    if time_used == '':
+        local_time = time.localtime()
+        time_used = ' '.join([str(local_time.tm_year), str(local_time.tm_mon), str(local_time.tm_mday),
+                              str(local_time.tm_hour), str(local_time.tm_min), str(local_time.tm_sec)])
+    print('the time used is', time_used)
+    estimate_sunrise_sunset_mk2(-105, 40, time_used, -7, True)
