@@ -312,4 +312,7 @@ if __name__ == '__main__':
         time_used = ' '.join([str(local_time.tm_year), str(local_time.tm_mon), str(local_time.tm_mday),
                               str(local_time.tm_hour), str(local_time.tm_min), str(local_time.tm_sec)])
     print('the time used is', time_used)
+    # Boulder, Colorado
     estimate_sunrise_sunset_mk2(-105, 40, time_used, -7, True)
+    # NYC, New York
+    estimate_sunrise_sunset_mk2(-73.935242, 40.730610, time_used, -5, True)
