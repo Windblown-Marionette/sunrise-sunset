@@ -247,13 +247,13 @@ def estimate_sunrise_sunset(latitude_, longitude_, time_string_, time_zone_, is_
     solar_noon_ = solar_noon(eq_of_time=eq_of_time_, longitude=longitude_, time_zone=time_zone_)
     ha_sunrise_ = ha_sunrise(sun_declin=sun_declin_, latitude=latitude_)
 
-    print(sunrise_time(solar_noon_, ha_sunrise_))
-    print(sunset_time(solar_noon_, ha_sunrise_))
+    ##print(sunrise_time(solar_noon_, ha_sunrise_))
+    ##print(sunset_time(solar_noon_, ha_sunrise_))
 
     # sunrise_time and sunset_time are in LST, and seem to be expressed as floats spanning 0 to 1
     # for a very questionable conversion to make proof-of-concept results
     # I will multiply this LST day length fraction with a 24HR day
-    print('roughly... ')
+    ##print('roughly... ')
     rise_rough_s = int(sunrise_time(solar_noon_, ha_sunrise_) * SECONDS_PER_DAY)
     set_rough_s = int(sunset_time(solar_noon_, ha_sunrise_) * SECONDS_PER_DAY)
     if is_dst_:
@@ -263,12 +263,12 @@ def estimate_sunrise_sunset(latitude_, longitude_, time_string_, time_zone_, is_
     sunrise_estimate_rough = time.strptime(
         f'{rise_rough_s // (60 * 60)} {(rise_rough_s // 60) % 60} {rise_rough_s % 60}',
         '%H %M %S')
-    print(f'sunrise time: {sunrise_estimate_rough}')
+    #print(f'sunrise time: {sunrise_estimate_rough}')
 
     sunset_estimate_rough = time.strptime(
         f'{set_rough_s // (60 * 60)} {(set_rough_s // 60) % 60} {set_rough_s % 60}',
         '%H %M %S')
-    print(f'sunset time: {sunset_estimate_rough}')
+    #print(f'sunset time: {sunset_estimate_rough}')
     if return_s:
         return rise_rough_s, set_rough_s
     else:
@@ -276,7 +276,7 @@ def estimate_sunrise_sunset(latitude_, longitude_, time_string_, time_zone_, is_
 
 
 def get_sunrise_sunset_daily(latitude, longitude, time_string, time_zone, is_dst):
-    print('why doesn\'t this do anything!!!! latitude is', latitude)
+    '''docstring'''
     # as time passes, the estimated sunrise and sunset times for this day change
     # this function uses a loop to find the point in time
     # when the (time of day) and (estimated sunrise, sunset times) intersect
@@ -286,32 +286,32 @@ def get_sunrise_sunset_daily(latitude, longitude, time_string, time_zone, is_dst
 
     sunrise_in_seconds = 0
     sunset_in_seconds = 0
-
-    # get sunrise
     print('asdf')
-    for time_elapsed in range(1, SECONDS_PER_DAY + 1):
+    # get sunrise
+    print(sunrise_in_seconds + sunset_in_seconds)
+    for time_elapsed in range(0, SECONDS_PER_DAY):
         h = str(time_elapsed // 3600)
         m = str((time_elapsed // 60) % 60)
         s = str(time_elapsed % 60)
         time_elapsed_string_ = f'{time_string} {h} {m} {s}'
         estimated_sunrise_seconds = estimate_sunrise_sunset(latitude, longitude, time_elapsed_string_, time_zone, is_dst, return_s=True)[0]
         print('seeking sunrise')
+        print('timediff_sunrise', time_elapsed - estimated_sunrise_seconds)
         if time_elapsed < estimated_sunrise_seconds:
             print('got sunrise')
             sunrise_in_seconds = time_elapsed
-            break
-        raise Exception('No sunrise found')
 
     # get sunset
-    for time_elapsed in range(1, SECONDS_PER_DAY + 1):
+    for time_elapsed in range(0, SECONDS_PER_DAY):
         print(time_elapsed / SECONDS_PER_DAY)
         h = str(time_elapsed // 3600)
         m = str((time_elapsed // 60) % 60)
         s = str(time_elapsed % 60)
         time_elapsed_string_ = f'{time_string} {h} {m} {s}'
         print('seeking sunset')
-        if time_elapsed <= \
-                estimate_sunrise_sunset(latitude, longitude, time_elapsed_string_, time_zone, is_dst, return_s=True)[1]:
+        estimated_sunset_seconds = estimate_sunrise_sunset(latitude, longitude, time_elapsed_string_, time_zone, is_dst, return_s=True)[1]
+        print('timediff_sunset', time_elapsed - estimated_sunset_seconds)
+        if time_elapsed <= estimated_sunset_seconds:
             continue
         else:
             print('got sunset')
