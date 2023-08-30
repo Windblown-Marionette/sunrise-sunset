@@ -220,7 +220,7 @@ def solar_azimuth_angle(latitude, sun_declin, hour_angle, solar_zenith_angle):
         return math.fmod(540 - radians_to_degrees(math.acos(((math.sin(degrees_to_radians(latitude)) * math.cos(degrees_to_radians(solar_zenith_angle))) - math.sin(degrees_to_radians(sun_declin))) / (math.cos(degrees_to_radians(latitude)) * math.sin(degrees_to_radians(solar_zenith_angle))))), 360.0)
 
 
-def estimate_sunrise_sunset_mk2(longitude_, latitude_, time_string_, time_zone_, is_dst):
+def estimate_sunrise_sunset(latitude_, longitude_, time_string_, time_zone_, is_dst_, return_s = False):
     # longitude_ and latitude_ will be int values, Longitude_ is + to East and latitude is + to North
 
     # time_string will follow the order 'year month day hour minute second'
@@ -256,7 +256,7 @@ def estimate_sunrise_sunset_mk2(longitude_, latitude_, time_string_, time_zone_,
     print('roughly... ')
     rise_rough_s = int(sunrise_time(solar_noon_, ha_sunrise_) * SECONDS_PER_DAY)
     set_rough_s = int(sunset_time(solar_noon_, ha_sunrise_) * SECONDS_PER_DAY)
-    if is_dst:
+    if is_dst_:
         rise_rough_s += 3600
         set_rough_s += 3600
 
@@ -269,37 +269,66 @@ def estimate_sunrise_sunset_mk2(longitude_, latitude_, time_string_, time_zone_,
         f'{set_rough_s // (60 * 60)} {(set_rough_s // 60) % 60} {set_rough_s % 60}',
         '%H %M %S')
     print(f'sunset time: {sunset_estimate_rough}')
+    if return_s:
+        return rise_rough_s, set_rough_s
+    else:
+        return sunrise_estimate_rough, sunset_estimate_rough
 
 
-def get_sunrise_sunset(latitude, longitude, utc_offset, date, event):
+def get_sunrise_sunset_daily(latitude, longitude, time_string, time_zone, is_dst):
     # as time passes, the estimated sunrise and sunset times for this day change
     # this function uses a loop to find the point in time
     # when the (time of day) and (estimated sunrise, sunset times) intersect
 
+    # time_string will follow the order 'year month day hour minute second'
+    # example: time_string = '2023 07 08 30' would be August 30, 2023
+
+    sunrise_in_seconds = 0
+    sunset_in_seconds = 0
+
     # get sunrise
     for time_elapsed in range(1, SECONDS_PER_DAY + 1):
+        h = str(time_elapsed // 3600)
+        m = str((time_elapsed // 60) % 60)
+        s = str(time_elapsed % 60)
+        time_elapsed_string_ = f'{time_string} {h} {m} {s}'
+
         if time_elapsed < \
-                estimate_sunrise_sunset_mk2(latitude, longitude, utc_offset, date, seconds_since_midnight=time_elapsed,
-                                        return_seconds=True)['sunrise']:
+                estimate_sunrise_sunset(latitude, longitude, time_elapsed_string_, time_zone, is_dst, return_s=True)[0]:
             continue
         else:
             print('got sunrise')
             sunrise_in_seconds = time_elapsed
             break
+
     # get sunset
     for time_elapsed in range(1, SECONDS_PER_DAY + 1):
+        h = str(time_elapsed // 3600)
+        m = str((time_elapsed // 60) % 60)
+        s = str(time_elapsed % 60)
+        time_elapsed_string_ = f'{time_string} {h} {m} {s}'
         if time_elapsed < \
-                estimate_sunrise_sunset_mk2(latitude, longitude, utc_offset, date, seconds_since_midnight=time_elapsed,
-                                        return_seconds=True)['sunset']:
+                estimate_sunrise_sunset(latitude, longitude, time_elapsed_string_, time_zone, is_dst, return_s=True)[1]:
             continue
         else:
             print('got sunset')
             sunset_in_seconds = time_elapsed
             break
-    ######convert sunrise_in_seconds, sunset_in_seconds to datetime format
-    sunrise_in_datetime = 99999
-    sunset_in_datetime = 9999
-    return sunrise_in_datetime, sunset_in_datetime
+
+    print('\n\n\n')
+    print(sunrise_in_seconds / SECONDS_PER_DAY)
+    print(sunset_in_seconds / SECONDS_PER_DAY)
+    # convert from seconds to a user-readable format
+    sunrise_h_m_s = time.strptime(
+        f'{sunrise_in_seconds // (60 * 60)} {(sunrise_in_seconds // 60) % 60} {sunrise_in_seconds % 60}',
+        '%H %M %S')
+    print(f'sunrise time: {sunrise_h_m_s}')
+
+    sunset_h_m_s = time.strptime(
+        f'{sunset_in_seconds // (60 * 60)} {(sunset_in_seconds // 60) % 60} {sunset_in_seconds % 60}',
+        '%H %M %S')
+    print(f'sunset time: {sunset_h_m_s}')
+    return
 
 
 if __name__ == '__main__':
@@ -313,6 +342,10 @@ if __name__ == '__main__':
                               str(local_time.tm_hour), str(local_time.tm_min), str(local_time.tm_sec)])
     print('the time used is', time_used)
     # Boulder, Colorado
-    estimate_sunrise_sunset_mk2(-105, 40, time_used, -7, True)
+    estimate_sunrise_sunset(40, -105, time_used, -7, True, False)
     # NYC, New York
-    estimate_sunrise_sunset_mk2(-73.935242, 40.730610, time_used, -5, True)
+    estimate_sunrise_sunset(40.730610, -73.935242, time_used, -5, True, False)
+    print('test daily')
+    get_sunrise_sunset_daily(-73.935242, 40.730610, '2023 8 30', -5, True)
+    print('\n\n\n', 'NYC at midnight')
+    estimate_sunrise_sunset(40.730610, -73.935242, '2023 08 30 0 0 0', -5, True, False)
