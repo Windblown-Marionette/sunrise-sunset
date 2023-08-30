@@ -276,6 +276,7 @@ def estimate_sunrise_sunset(latitude_, longitude_, time_string_, time_zone_, is_
 
 
 def get_sunrise_sunset_daily(latitude, longitude, time_string, time_zone, is_dst):
+    print('why doesn\'t this do anything!!!! latitude is', latitude)
     # as time passes, the estimated sunrise and sunset times for this day change
     # this function uses a loop to find the point in time
     # when the (time of day) and (estimated sunrise, sunset times) intersect
@@ -287,32 +288,40 @@ def get_sunrise_sunset_daily(latitude, longitude, time_string, time_zone, is_dst
     sunset_in_seconds = 0
 
     # get sunrise
+    print('asdf')
     for time_elapsed in range(1, SECONDS_PER_DAY + 1):
         h = str(time_elapsed // 3600)
         m = str((time_elapsed // 60) % 60)
         s = str(time_elapsed % 60)
         time_elapsed_string_ = f'{time_string} {h} {m} {s}'
-
-        if time_elapsed < \
-                estimate_sunrise_sunset(latitude, longitude, time_elapsed_string_, time_zone, is_dst, return_s=True)[0]:
-            continue
-        else:
+        estimated_sunrise_seconds = estimate_sunrise_sunset(latitude, longitude, time_elapsed_string_, time_zone, is_dst, return_s=True)[0]
+        print('seeking sunrise')
+        if time_elapsed < estimated_sunrise_seconds:
             print('got sunrise')
             sunrise_in_seconds = time_elapsed
             break
+        raise Exception('No sunrise found')
 
     # get sunset
     for time_elapsed in range(1, SECONDS_PER_DAY + 1):
+        print(time_elapsed / SECONDS_PER_DAY)
         h = str(time_elapsed // 3600)
         m = str((time_elapsed // 60) % 60)
         s = str(time_elapsed % 60)
         time_elapsed_string_ = f'{time_string} {h} {m} {s}'
-        if time_elapsed < \
+        print('seeking sunset')
+        if time_elapsed <= \
                 estimate_sunrise_sunset(latitude, longitude, time_elapsed_string_, time_zone, is_dst, return_s=True)[1]:
             continue
         else:
             print('got sunset')
             sunset_in_seconds = time_elapsed
+            print('sunset at', sunset_in_seconds)
+            print(time_elapsed, 'time elapsed versus', estimate_sunrise_sunset(latitude, longitude, time_elapsed_string_, time_zone, is_dst, return_s=True)[1])
+            print('total seconds', sunset_in_seconds)
+            print('hours', sunset_in_seconds / 3600)
+            print('minutes', ((sunset_in_seconds / 60) % 60))
+            print('seconds', sunset_in_seconds % 60)
             break
 
     print('\n\n\n')
@@ -346,6 +355,6 @@ if __name__ == '__main__':
     # NYC, New York
     estimate_sunrise_sunset(40.730610, -73.935242, time_used, -5, True, False)
     print('test daily')
-    get_sunrise_sunset_daily(-73.935242, 40.730610, '2023 8 30', -5, True)
+    get_sunrise_sunset_daily(-73.935242, 40.730610, '2023 08 30', -5, True)
     print('\n\n\n', 'NYC at midnight')
     estimate_sunrise_sunset(40.730610, -73.935242, '2023 08 30 0 0 0', -5, True, False)
